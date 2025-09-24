@@ -21,10 +21,10 @@ sum_of_five = sum(num for num in set_list if isinstance(num, int) and num % 5 ==
 # for num in num_list:
 #     if num_list.count(num) == 1:
 #         unique_list.append(num)
-#     elif num_list.count(num) > 1 and num not in repeating_list:
-#         repeating_list.append(num)
         
 # for num in set_list:
+#     if set_list.count(num) > 1 and num not in unique_list:
+#         repeating_list.append(num)
 #     if isinstance(num, int):
 #         if num % 2 == 0:
 #             even_list.append(num)
