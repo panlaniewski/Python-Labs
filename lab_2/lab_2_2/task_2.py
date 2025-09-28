@@ -1,5 +1,5 @@
 dict_a = { 'a': 3, 'b': { 'c': 1, 'f': 4 } }
-dict_b = { 'a': 4, 'd': 1, 'b': { 'c': 2, 'e': 3 } } 
+dict_b = { 'd': 1, 'b': { 'c': 2, 'e': 3 } } 
 
 def merge_dicts(dict1: dict, dict2: dict):
     for key, value in dict2.items():
@@ -8,7 +8,7 @@ def merge_dicts(dict1: dict, dict2: dict):
                 merge_dicts(dict1[key], value)
             elif isinstance(dict1[key], (int, float)) and isinstance(value, (int, float)):
                 dict1[key] = max(dict1[key], value)
-            else:
+            elif type(value) is not type(dict1[key]):
                 dict1[key] = [dict1[key], value]
         else:
             dict1[key] = value
