@@ -1,4 +1,4 @@
-dict_a = { 'a': 1, 'b': { 'c': 1, 'f': 4 } }
+dict_a = { 'a': 1, 'b': { 'c': 1, 'f': 4 }, 'g': (1, 2) }
 dict_b = { 'd': 1, 'b': { 'c': 2, 'e': 3 } } 
 
 def merge_dicts(dict1: dict, dict2: dict):
