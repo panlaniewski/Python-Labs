@@ -5,17 +5,17 @@ def timing(func):
         time_start = time()
         res = func(*args, **kwargs)
         time_end = time()
-        work_time = time_end - time_start
-        print("Время выполнения функции (в мс):", work_time)
+        work_time = (time_end - time_start) * 1000
+        print("Время выполнения функции:", work_time, "мс")
         return res
     return wrapper
 
 @timing
-def get_loop(n):
+def test_loop(n):
     i = 0
     for _ in range(n):
         i += 1
     return i
 
-print(get_loop(10))
-print(get_loop(100000000))
+print(test_loop(10))
+print(test_loop(1000000))
