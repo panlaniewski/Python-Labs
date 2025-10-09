@@ -10,7 +10,7 @@ class Bank:
         if customer.id not in self.customers:
             raise ValueError("Клиента нет в списке банка.")
         if currency in customer.accounts:
-            print("У клиента уже есть счёт в этой валюте.")
+            raise ValueError("У клиента уже есть счёт в этой валюте.")
         else:
             account = Account(customer, currency)
             customer.accounts[currency] = account
@@ -18,9 +18,9 @@ class Bank:
     # --------------------------------------------------------------------------------------------------------
     def close_account(self, customer, currency):
         if customer.id not in self.customers:
-            print("Клиента нет в списке банка.")
+            raise ValueError("Клиента нет в списке банка.")
         if currency not in customer.accounts:
-            print("Такого счёта у клиента нет.")
+            raise ValueError("Такого счёта у клиента нет.")
         else:
             del customer.accounts[currency]
     # --------------------------------------------------------------------------------------------------------
@@ -45,9 +45,9 @@ class Bank:
     # --------------------------------------------------------------------------------------------------------   
     def _get_account(self, customer, currency):
         if customer.id not in self.customers:
-            print("Клиента нет в списке банка.")
+            raise ValueError("Клиента нет в списке банка.")
         if currency not in customer.accounts:
-            print("У клиента нет счёта в этой валюте.")
+            raise ValueError("У клиента нет счёта в этой валюте.")
         else:
             return customer.accounts[currency]
 # ------------------------------------------------------------------------------------------------------------    
@@ -126,79 +126,76 @@ while True:
                     print("8. Выйти")
                     # -------------------------------------------------------------------------------------------
                     customers_action = input()
-                    # -------------------------------------------------------------------------------------------
-                    if customers_action == "1":
-                        currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
-                        belarusbank.create_account(login_customer, currency)
-                        print("Счёт успешно создан!")
-                    # -------------------------------------------------------------------------------------------    
-                    elif customers_action == "2":
-                        currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
-                        belarusbank.close_account(login_customer, currency)
-                        print("Счёт успешно закрыт!")
-                    # -------------------------------------------------------------------------------------------    
-                    elif customers_action == "3":
-                        currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
-                        amount = input("Введите сумму пополнения: ")
-                        if amount.isdigit():
-                            amount = float(amount)
+                    try:
+                        # -------------------------------------------------------------------------------------------
+                        if customers_action == "1":
+                            currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
+                            belarusbank.create_account(login_customer, currency)
+                            print("Счёт успешно создан!")
+                        # -------------------------------------------------------------------------------------------    
+                        elif customers_action == "2":
+                            currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
+                            belarusbank.close_account(login_customer, currency)
+                            print("Счёт успешно закрыт!")
+                        # -------------------------------------------------------------------------------------------    
+                        elif customers_action == "3":
+                            currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
+                            amount = float(input("Введите сумму пополнения: "))
                             belarusbank.add_to_account(login_customer, currency, max(amount, 0))
                             print(f"Счёт пополнен на {amount} {currency}")
-                    # -------------------------------------------------------------------------------------------        
-                    elif customers_action == "4":
-                        currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
-                        amount = input("Введите сумму пополнения: ")
-                        if amount.isdigit():
-                            amount = float(amount)
+                        # -------------------------------------------------------------------------------------------        
+                        elif customers_action == "4":
+                            currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
+                            amount = float(input("Введите сумму пополнения: "))
                             belarusbank.get_from_account(login_customer, currency, max(amount, 0))
                             print(f"Со счёта снята сумма в {amount} {currency}")
-                    # -------------------------------------------------------------------------------------------
-                    elif customers_action == "5":
-                        to_id = input("Введите ID получателя: ")
-                        amount = input("Введите сумму перевода: ")
                         # -------------------------------------------------------------------------------------------
-                        if to_id.isdigit() and amount.isdigit():
-                            to_id = int(to_id)
-                            amount = float(amount)
+                        elif customers_action == "5":
+                            to_id = input("Введите ID получателя: ")
+                            amount = input("Введите сумму перевода: ")
                             # -------------------------------------------------------------------------------------------
-                            if to_id == login_customer.id:
-                                print("Нельзя перевести сумму на свой же счёт")
-                                continue
+                            if to_id.isdigit() and amount.isdigit():
+                                to_id = int(to_id)
+                                amount = float(amount)
+                                # -------------------------------------------------------------------------------------------
+                                if to_id == login_customer.id:
+                                    raise ValueError("Нельзя перевести сумму на свой же счёт")
+                                # -------------------------------------------------------------------------------------------
+                                if to_id not in belarusbank.customers:
+                                    raise ValueError("Получатель не найден")
+                                # -------------------------------------------------------------------------------------------
+                                if to_id >= 0:
+                                    to_customer = belarusbank.customers[to_id]
+                                    currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
+                                    belarusbank.transfer_to_account(login_customer, to_customer, currency, max(amount, 0))
                             # -------------------------------------------------------------------------------------------
-                            if to_id not in belarusbank.customers:
-                                print("Получатель не найден")
-                                continue
-                            # -------------------------------------------------------------------------------------------
-                            if to_id >= 0:
-                                to_customer = belarusbank.customers[to_id]
-                                currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
-                                belarusbank.transfer_to_account(login_customer, to_customer, currency, max(amount, 0))
+                        elif customers_action == "6":
+                            login_customer.print_accounts()
                         # -------------------------------------------------------------------------------------------
-                    elif customers_action == "6":
-                        login_customer.print_accounts()
-                    # -------------------------------------------------------------------------------------------
-                    elif customers_action == "7":
-                        path = f"Extract_bank_{login_customer.name}.txt"
-                        accounts_str = "Выписка по вашим счетам:\n\n"
-                        total_sum = 0
+                        elif customers_action == "7":
+                            path = f"Extract_bank_{login_customer.name}.txt"
+                            accounts_str = "Выписка по вашим счетам:\n\n"
+                            total_sum = 0
+                            # -------------------------------------------------------------------------------------------
+                            if not login_customer.accounts:
+                                accounts_str += "У вас пока нет открытых счетов.\n"
+                            else:
+                                for currency, account in login_customer.accounts.items():
+                                    accounts_str += f"Счёт в {currency}: баланс {account.sum:.2f}\n"
+                                    total_sum += account.sum
+                                accounts_str += f"\nОбщая сумма по всем счетам: {total_sum:.2f}"
+                            # -------------------------------------------------------------------------------------------
+                            with open(path, "w", encoding="utf-8") as file:
+                                file.write(accounts_str)
+                            # -------------------------------------------------------------------------------------------
+                            print(f"Выписка успешно сохранена в файл: {path}\n")
                         # -------------------------------------------------------------------------------------------
-                        if not login_customer.accounts:
-                            accounts_str += "У вас пока нет открытых счетов.\n"
+                        elif customers_action == "8":
+                            break
                         else:
-                            for currency, account in login_customer.accounts.items():
-                                accounts_str += f"Счёт в {currency}: баланс {account.sum:.2f}\n"
-                                total_sum += account.sum
-                            accounts_str += f"\nОбщая сумма по всем счетам: {total_sum:.2f}"
-                        # -------------------------------------------------------------------------------------------
-                        with open(path, "w", encoding="utf-8") as file:
-                            file.write(accounts_str)
-                        # -------------------------------------------------------------------------------------------
-                        print(f"Выписка успешно сохранена в файл: {path}\n")
-                    # -------------------------------------------------------------------------------------------
-                    elif customers_action == "8":
-                        break
-                    else:
-                        print("Вы ввели что-то не то. Попробуйте снова")
+                            print("Вы ввели что-то не то. Попробуйте снова")
+                    except ValueError as e:
+                        print(" Ошибка:", e)
             # -------------------------------------------------------------------------------------------
             else:
                 print("Такого клиента нет у нашего банка")
@@ -208,15 +205,19 @@ while True:
             break
     # ------------------------------------------------------------------------------------------------------------
     elif choice == "2":
-        print("Введите ваши данные:")
-        new_id = input("Введите ID: ")
-        name = input("Имя: ")
-        surname = input("Фамилия: ")
-        age = input("Возраст: ")
-        new_customer = Customer(int(new_id), name, surname, age)
-        belarusbank.add_customer(new_customer)
-        print(f"Отлично, {new_customer.name}! Теперь вы новый клиент нашего банка. Ваш ID = {new_customer.id}.")
-        continue
+        try:
+            print("Введите ваши данные:")
+            new_id = input("Введите ID: ")
+            if int(new_id) in belarusbank.customers.keys():
+                raise ValueError("Клиент с таким ID уже существует.")
+            name = input("Имя: ")
+            surname = input("Фамилия: ")
+            age = input("Возраст: ")
+            new_customer = Customer(int(new_id), name, surname, age)
+            belarusbank.add_customer(new_customer)
+            print(f"Отлично, {new_customer.name}! Теперь вы новый клиент нашего банка. Ваш ID = {new_customer.id}.")
+        except ValueError as e:
+            print("Ошибка:", e)
     # ------------------------------------------------------------------------------------------------------------
     elif choice == "3":
         belarusbank.print_customers()
