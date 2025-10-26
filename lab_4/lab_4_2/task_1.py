@@ -2,18 +2,18 @@ import numpy as np
 
 expenses = np.array([56.90, 50.20, 49.20, 46.70, 42.10, 51.20, 59.80, 62.50, 55.80, 56.30, 53.90, 60.40])
 month_dict = {
-    1: "январь",
-    2: "февраль",
-    3: "март",
-    4: "апрель",
-    5: "май",
-    6: "июнь",
-    7: "июль",
-    8: "август",
-    9: "сентябрь",
-    10: "октябрь",
-    11: "ноябрь",
-    12: "декабрь",
+    1: "January",
+    2: "Febuary",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "Jule",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
 }
 
 winter_index = [0, 1, 11]
@@ -22,17 +22,17 @@ winter_expenses = expenses[winter_index]
 summer_expenses = expenses[summer_index]
 
 winter_sum = np.sum(winter_expenses)
-print("Сумма расходов зимой:", winter_sum, "BYN")
+print("Amount of expenses in winter:", winter_sum, "BYN")
 summer_sum = np.sum(summer_expenses)
-print("Сумма расходов летом:", summer_sum, "BYN")
+print("Amount of expenses in summer:", summer_sum, "BYN")
 
 if winter_sum > summer_sum:
-    print("В зимний период расходы больше")
+    print("During the winter period, expenses are higher")
 elif winter_sum == summer_sum:
-    print("В зимний и летний периоды расходы равны")
+    print("In winter and summer period expenses are equal")
 else:
-    print("В летний период расходы больше")
+    print("During the summer period, expenses are higher")
     
 max_expenses = np.max(expenses)
 max_month = np.where(expenses  == max_expenses)[0] + 1
-print(f"Максимальная сумма расходов за весь год: {max_expenses} BYN. Месяц: {month_dict[max_month[0]]}")
+print(f"Max amount of expenses during this year: {max_expenses} BYN in {month_dict[max_month[0]]}")
