@@ -11,7 +11,7 @@ def generate_entrance_campaign_data(count=100):
         data = json.load(f)
     specialties_data = data['specialties']
     for _ in range(count):
-        admission_year = fake.random_int(min=2020, max=2025)
+        admission_year = fake.random_int(min=2020, max=2024)
         exams_score = fake.random_int(min=150, max=300)
         certificate_grade = round(np.random.uniform(7.0, 10.0), 1)
         admission_score = round(exams_score + (certificate_grade * 10))
@@ -34,6 +34,5 @@ def generate_entrance_campaign_data(count=100):
     return students
 
 dataset = generate_entrance_campaign_data()
-
 df = pd.DataFrame(dataset)
 df.to_csv('entrance_campaign.csv', index=False)
