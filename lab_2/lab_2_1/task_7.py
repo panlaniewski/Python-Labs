@@ -1,4 +1,4 @@
-user_str = input()
+user_str = input("Введите любую строку: ")
 
 if user_str == "":
     print(0)

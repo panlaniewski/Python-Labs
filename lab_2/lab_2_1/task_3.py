@@ -1,6 +1,6 @@
 user_list = input("Введите последовательность чисел: ")
 
-sorted_list = user_list.split()
+sorted_list = [float(x) for x in user_list.split()]
 sorted_list.sort()
 sorted_list.reverse()
 

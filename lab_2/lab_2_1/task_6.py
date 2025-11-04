@@ -1,4 +1,4 @@
-user_list = input("Введите список элементов: ").split()
+user_list = input("Введите список элементов: ").lower().split()
 
 # for item in user_list:
 #     if user_list.count(item) > 1:
