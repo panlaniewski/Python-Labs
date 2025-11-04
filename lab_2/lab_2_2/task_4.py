@@ -3,10 +3,14 @@ rows, cols = int(input("Количество строк: ")), int(input("Кол�
 
 matrix = []
 for i in range(rows):
-    row = []
-    for j in range(cols):
-        row.append(int(input()))
-    matrix.append(row)
+    row = input().split(" ")
+    if len(row) == rows:
+        matrix.append([int(x) for x in row])
+        raise IndexError("Несоответствие размеров строки")
+    elif len(row) < rows:
+        print(f"Недостаточно элементов в строке! Должно быть {rows}")
+    else:
+        print(f"Слишком много элементов в строке! Должно быть {rows}")
     
 print("Исходная матрица:")
 for i in range(rows):
