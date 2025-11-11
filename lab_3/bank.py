@@ -58,9 +58,12 @@ class Account:
         self.sum = 0
     # -------------------------------------------------------------------------------------------    
     def add(self, amount):
-        if amount <= 0:
+        if not isinstance(amount, float):
+            raise TypeError("Введите число!")
+        elif amount <= 0:
             raise ValueError("Введите положительное число")
-        self.sum += amount
+        else:
+            self.sum += amount
     # -------------------------------------------------------------------------------------------
     def get(self, amount):
         if amount <= 0:
@@ -141,20 +144,20 @@ while True:
                         elif customers_action == "3":
                             currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
                             amount = float(input("Введите сумму пополнения: "))
-                            belarusbank.add_to_account(login_customer, currency, max(amount, 0))
+                            belarusbank.add_to_account(login_customer, currency, amount)
                             print(f"Счёт пополнен на {amount} {currency}")
                         # -------------------------------------------------------------------------------------------        
                         elif customers_action == "4":
                             currency = input("Введите валюту вашего счёта (BYN, USD, EUR и т.д.): ").upper()
                             amount = float(input("Введите сумму пополнения: "))
-                            belarusbank.get_from_account(login_customer, currency, max(amount, 0))
+                            belarusbank.get_from_account(login_customer, currency, amount)
                             print(f"Со счёта снята сумма в {amount} {currency}")
                         # -------------------------------------------------------------------------------------------
                         elif customers_action == "5":
                             to_id = input("Введите ID получателя: ")
                             amount = input("Введите сумму перевода: ")
                             # -------------------------------------------------------------------------------------------
-                            if to_id.isdigit() and amount.isdigit():
+                            if to_id.isdigit():
                                 to_id = int(to_id)
                                 amount = float(amount)
                                 # -------------------------------------------------------------------------------------------
