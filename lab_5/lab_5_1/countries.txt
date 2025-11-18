@@ -39,7 +39,7 @@ Colombia
 Comoros
 Cook Islands
 Costa Rica
-Cote d’Ivoire (Ivory Coast)
+Ivory Coast
 Croatia
 Cuba
 Cyprus
@@ -141,7 +141,7 @@ Philippines
 Poland
 Portugal
 Qatar
-Republic of Korea (South Korea)
+South Korea
 Republic of the Congo
 Romania
 Russia
@@ -186,6 +186,7 @@ Uganda
 Ukraine
 United Arab Emirates
 United Kingdom
+United States
 Uruguay
 Uzbekistan
 Vanuatu
