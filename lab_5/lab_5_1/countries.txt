@@ -122,7 +122,7 @@ Mozambique
 Namibia
 Nauru
 Nepal
-Netherlands, The
+Netherlands
 New Zealand
 Nicaragua
 Niger
@@ -160,7 +160,7 @@ Sierra Leone
 Singapore
 Slovakia
 Slovenia
-Solomon Islands, The
+Solomon Islands
 Somalia
 South Africa
 South Sudan
@@ -184,8 +184,8 @@ Turkmenistan
 Tuvalu
 Uganda
 Ukraine
-United Arab Emirates, The
-United Kingdom, The
+United Arab Emirates
+United Kingdom
 Uruguay
 Uzbekistan
 Vanuatu
