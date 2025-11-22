@@ -12,7 +12,6 @@ except:
 headers = {
     "User-Agent": "'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Mobile Safari/537.36'"
 }
-
 data = {
     "name": [],
     "capital": [],
@@ -21,60 +20,87 @@ data = {
 }
 
 for country in countries_list:
+    if not country.strip(): 
+        continue
+    # ------------------------------------------------------------------------------------------------------
     url = f"https://en.wikipedia.org/wiki/{country}"
-
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    print(f"Статус: {response.status_code}")
-
+    # ------------------------------------------------------------------------------------------------------
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        print(f"Статус: {response.status_code}")
+    except Exception as e:
+        print(f"Ошибка при запросе для {country}: {e}")
+        data["name"].append(country)
+        data["capital"].append("")
+        data["area (km2)"].append("")
+        data["population"].append("")
+        continue
+    # ------------------------------------------------------------------------------------------------------    
     soup = BeautifulSoup(response.text, 'html.parser')
     title = soup.find('h1').get_text().strip()
-    print(title)
+    print("Name:", title)
     data["name"].append(title)
-
-    tables = soup.find_all("tr")
+    # ------------------------------------------------------------------------------------------------------
+    capital_found = False
+    area_found = False
+    population_found = False
     capital = ""
-    for row in tables:
-        th = row.find('th')
-        if th:
-            if 'Capital' in th.get_text():
-                td = row.find('td').find("a")
-                if td:
-                    capital = td.get_text()
-                    break
-    data["capital"].append(capital)
-
-    mergedrows = soup.find_all("tr", class_="mergedrow")
     area = ""
-    for row in mergedrows:
-        th = row.find('th')
-        if th:
-            if 'Total' in th.get_text():
-                td = row.find('td')
-                if td:
-                    area = td.get_text()
-                    break
-    area = area.split(" ")[0][:-4].replace(",", "")
-    area = re.sub(r'\[.*?\]', '', area)
-    data["area (km2)"].append(area)
-
-    mergedtoprows = soup.find_all("tr", class_="mergedtoprow")
     population = ""
-    for row in mergedtoprows:
-        th = row.find('th')
-        if th and th.find("a"):
-            if 'Population' in th.find("a").get_text():
-                tr = row.find_next('tr', class_='mergedrow')
-                if tr:
-                    text_nodes = tr.find("td").find_all(string=True, recursive=False)
-                    if len(text_nodes) > 0:
-                        population = text_nodes[0].strip()
+    # ------------------------------------------------------------------------------------------------------
+    infobox = soup.find('table', class_='infobox')
+    for row in infobox.find_all('tr'):
+        header = row.find('th')
+        if not header:
+            continue
+        header_text = header.get_text().strip()
+        # ------------------------------------------------------------------------------------------------------
+        if not capital_found and 'Capital' in header_text:
+                capital_link = row.find('td')
+                if capital_link:
+                    capital_a = capital_link.find('a')
+                    if capital_a:
+                        capital = capital_a.get_text().strip()
                     else:
-                        population = tr.find("td").get_text()
-                    break
-    population = population.replace(",", "")
-    population = re.sub(r'\[.*?\]', '', population)
-    data["population"].append(population)
-    
+                        capital = capital_link.get_text().strip().split('\n')[0]
+                print("Capital:", capital)
+                capital_found = True
+        # ------------------------------------------------------------------------------------------------------        
+        if not area_found and 'Area' in header_text:
+                td = row.find('td')
+                if not td:
+                    next_row = row.find_next_sibling()
+                    if next_row:
+                        td = next_row.find("td")
+                if td:
+                    td_text = td.get_text()
+                    numbers = re.findall(r'[\d,]+', td_text)
+                    if numbers:
+                        area = numbers[0].replace(',', '')
+                        print("Area:", area)
+                        area_found = True
+        # ------------------------------------------------------------------------------------------------------
+        if not population_found and 'Population' in header_text:
+                td = row.find('td')
+                if not td:
+                    next_row = row.find_next_sibling()
+                    if next_row:
+                        td = next_row.find("td")
+                if td:
+                    text = td.get_text()
+                    numbers = re.findall(r'[\d,]+', text)
+                    if numbers:
+                        population = numbers[0].replace(',', '')
+                        print("Population:", population)
+                        population_found = True
+        # ------------------------------------------------------------------------------------------------------                
+        if capital_found and area_found and population_found:
+                break
+    # --------------------------------------------------------------------------------------------------------            
+    data['capital'].append(capital)
+    data['area (km2)'].append(area)
+    data['population'].append(population)
+
 df = pd.DataFrame(data)
 df.to_csv("countries.csv", index=0)

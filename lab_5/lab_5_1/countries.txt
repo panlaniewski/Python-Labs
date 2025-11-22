@@ -62,7 +62,7 @@ Finland
 France
 Gabon
 Gambia
-Georgia
+Georgia (country)
 Germany
 Ghana
 Greece
@@ -72,7 +72,6 @@ Guinea
 Guinea-Bissau
 Guyana
 Haiti
-Holy See
 Honduras
 Hungary
 Iceland
@@ -80,7 +79,7 @@ India
 Indonesia
 Iran
 Iraq
-Ireland
+Republic of Ireland
 Israel
 Italy
 Jamaica
@@ -112,7 +111,7 @@ Marshall Islands
 Mauritania
 Mauritius
 Mexico
-Micronesia
+Federated States of Micronesia
 Moldova
 Monaco
 Mongolia
@@ -189,6 +188,7 @@ United Kingdom
 United States
 Uruguay
 Uzbekistan
+Vatican City
 Vanuatu
 Venezuela
 Vietnam
