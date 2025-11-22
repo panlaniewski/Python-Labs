@@ -1,4 +1,4 @@
-name,capital,area (km2),population
+country,city,area,population
 Afghanistan,Kabul,652864,40
 Albania,Tirana,28748,2402113
 Algeria,Algiers,2381741,47400000
@@ -35,7 +35,7 @@ Cayman Islands,George Town,264,88833
 Central African Republic,Bangui,622984,5650957
 Chad,N'Djamena,1280000,19093595
 Chile,Santiago,756101,19629588
-China,Beijing,9596961,1408280000
+China,Beijing,9596961,1
 Colombia,Bogotá,1141748,52695952
 Comoros,Moroni,2035,883075
 Cook Islands,Avarua,236,15040
@@ -62,7 +62,7 @@ Fiji,Suva,18274,926276
 Finland,Helsinki,338455,5635971
 France,Paris,632702,68605616
 Gabon,Libreville,267668,2397368
-The Gambia,Banjul,11300,34
+The Gambia,Banjul,,34
 Georgia (country),Tbilisi,69700,3657000
 Germany,Berlin,357114,83491249
 Ghana,Accra,240000,35039451
@@ -76,7 +76,7 @@ Haiti,Port-au-Prince,27700,11470261
 Honduras,Tegucigalpa,112492,9571352
 Hungary,Budapest,93030,9584627
 Iceland,Reykjavík,103125,391810
-India,New Delhi,3287263,1428627663
+India,New Delhi,,
 Indonesia,Jakarta,1904569,284438782
 Iran,Tehran,1648195,92417681
 Iraq,Baghdad,438317,46118793
@@ -92,7 +92,7 @@ Kiribati,Tarawa,811,121388
 Korea,Seoul,223172,77000000
 Kosovo,Pristina,10887,1585566
 Kuwait,Kuwait City,17818,4985716
-Kyrgyzstan,Bishkek,200105,7
+Kyrgyzstan,Bishkek,200105,107
 Laos,Vientiane,236800,7953556
 Latvia,Riga,64589,1842226
 Lebanon,Beirut,10452,5364482
@@ -157,7 +157,7 @@ Senegal,Dakar,196722,18847519
 Serbia,Belgrade,88499,6567783
 Seychelles,Victoria,457,121355
 Sierra Leone,Freetown,73252,8460512
-Singapore,city-state,736,6110200
+Singapore,city-state,1,1
 Slovakia,Bratislava,49035,5413813
 Slovenia,Ljubljana,20271,2130850
 Solomon Islands,Honiara,28896,734887
@@ -192,7 +192,7 @@ Uzbekistan,Tashkent,448978,38000269
 Vatican City,city-state,0,882
 Vanuatu,Port Vila,12189,335908
 Venezuela,Caracas,916445,30518260
-Vietnam,Hanoi,331344,100300000
+Vietnam,Hanoi,331344,106
 Yemen,Sanaa,455503,42091194
 Zambia,Lusaka,752617,20216029
 Zimbabwe,Harare,390757,16868409
