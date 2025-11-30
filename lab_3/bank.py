@@ -1,28 +1,43 @@
+class BankError(Exception):
+    pass
+
+class CustomerNotFoundError(BankError):
+    pass
+
+class AccountExistsError(BankError):
+    pass
+
+class AccountNotFoundError(BankError):
+    pass
+
+class NotEnoughMoneyError(BankError):
+    pass
+
 class Bank:
     def __init__(self, name):
         self.name = name 
         self.customers = {}
     # --------------------------------------------------------------------------------------------------------
     def add_customer(self, customer):
+        if customer.id in self.customers:
+            raise BankError("Клиент с таким ID уже существует.")
         self.customers[customer.id] = customer
     # --------------------------------------------------------------------------------------------------------
     def create_account(self, customer, currency):
         if customer.id not in self.customers:
-            raise ValueError("Клиента нет в списке банка.")
+            raise CustomerNotFoundError("Клиента нет в списке банка.")
         if currency in customer.accounts:
-            raise ValueError("У клиента уже есть счёт в этой валюте.")
-        else:
-            account = Account(customer, currency)
-            customer.accounts[currency] = account
-            return account
+            raise AccountExistsError("У клиента уже есть счёт в этой валюте.")
+        account = Account(customer, currency)
+        customer.accounts[currency] = account
+        return account
     # --------------------------------------------------------------------------------------------------------
     def close_account(self, customer, currency):
         if customer.id not in self.customers:
-            raise ValueError("Клиента нет в списке банка.")
+            raise CustomerNotFoundError("Клиента нет в списке банка.")
         if currency not in customer.accounts:
-            raise ValueError("Такого счёта у клиента нет.")
-        else:
-            del customer.accounts[currency]
+            raise AccountNotFoundError("Такого счёта у клиента нет.")
+        del customer.accounts[currency]
     # --------------------------------------------------------------------------------------------------------
     def add_to_account(self, customer, currency, amount):
         account = self._get_account(customer, currency)
@@ -45,11 +60,10 @@ class Bank:
     # --------------------------------------------------------------------------------------------------------   
     def _get_account(self, customer, currency):
         if customer.id not in self.customers:
-            raise ValueError("Клиента нет в списке банка.")
+            raise CustomerNotFoundError("Клиента нет в списке банка.")
         if currency not in customer.accounts:
-            raise ValueError("У клиента нет счёта в этой валюте.")
-        else:
-            return customer.accounts[currency]
+            raise AccountNotFoundError("У клиента нет счёта в этой валюте.")
+        return customer.accounts[currency]
 # ------------------------------------------------------------------------------------------------------------    
 class Account:
     def __init__(self, customer, currency):
@@ -67,11 +81,10 @@ class Account:
     # -------------------------------------------------------------------------------------------
     def get(self, amount):
         if amount <= 0:
-            raise ValueError("Введите положительное число")
+            raise ValueError("Введите положительное число.")
         if amount > self.sum:
-            print("На счету недостаточно средств")
-        else:
-            self.sum -= amount
+            raise NotEnoughMoneyError("На счету недостаточно средств.")
+        self.sum -= amount
 # ------------------------------------------------------------------------------------------------------------            
 class Customer:
     def __init__(self, id, name, surname, age):
@@ -210,15 +223,28 @@ while True:
     elif choice == "2":
         try:
             print("Введите ваши данные:")
+            # -------------------------------------------------------------------------------------------
             new_id = input("Введите ID: ")
-            if int(new_id) in belarusbank.customers.keys():
-                raise ValueError("Клиент с таким ID уже существует.")
+            if not new_id.isdigit():
+                raise ValueError("ID должно быть числом.")
+            # -------------------------------------------------------------------------------------------
+            new_id = int(new_id)
+            if new_id in belarusbank.customers:
+                raise BankError("Клиент с таким ID уже существует.")
+            # -------------------------------------------------------------------------------------------
             name = input("Имя: ")
             surname = input("Фамилия: ")
             age = input("Возраст: ")
-            new_customer = Customer(int(new_id), name, surname, age)
+            # -------------------------------------------------------------------------------------------
+            if not age.isdigit():
+                raise ValueError("Возраст должен быть числом.")
+            # -------------------------------------------------------------------------------------------
+            new_customer = Customer(new_id, name, surname, int(age))
             belarusbank.add_customer(new_customer)
-            print(f"Отлично, {new_customer.name}! Теперь вы новый клиент нашего банка. Ваш ID = {new_customer.id}.")
+            print(f"Отлично, {new_customer.name}! Теперь вы клиент нашего банка. Ваш ID = {new_customer.id}.")
+        # ------------------------------------------------------------------------------------------------
+        except BankError as e:
+            print("Ошибка:", e)
         except ValueError as e:
             print("Ошибка:", e)
     # ------------------------------------------------------------------------------------------------------------
