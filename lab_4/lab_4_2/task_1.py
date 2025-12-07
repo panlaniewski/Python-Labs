@@ -3,12 +3,12 @@ import numpy as np
 expenses = np.array([56.90, 50.20, 49.20, 46.70, 42.10, 51.20, 59.80, 62.50, 55.80, 56.30, 53.90, 60.40])
 month_dict = {
     1: "January",
-    2: "Febuary",
+    2: "February",
     3: "March",
     4: "April",
     5: "May",
     6: "June",
-    7: "Jule",
+    7: "July",
     8: "August",
     9: "September",
     10: "October",
