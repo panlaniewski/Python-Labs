@@ -97,13 +97,12 @@ ave_faculty_score = (
 )
 sns.barplot(data=ave_faculty_score, y="faculty_short_name", x="admission_score", palette="Set2", ax=axes[0,2], orient='h')
 axes[0,2].set_title("Средний балл по факультетам")
-axes[0,2].set_xlim(300, 330)
+axes[0,2].set_xlim(300, 335)
 axes[0,2].set_xlabel("")
 axes[0,2].set_ylabel("")
 
 year_counts = campaign_data["admission_year"].value_counts().sort_index()
 sns.barplot(x=year_counts.index.astype(str), y=year_counts.values, color="green", alpha=0.7, ax=axes[1,0])
-axes[1,0].set_ylim(1750, 2100)
 axes[1,0].set_title("Количество абитуриентов по годам")
 axes[1,0].set_xlabel("")
 
