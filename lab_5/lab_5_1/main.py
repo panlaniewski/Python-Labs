@@ -45,7 +45,7 @@ def get_cached_page(country, cache_dir, headers):
         with open(cache_file, 'w', encoding='utf-8') as f:
             f.write(response.text)
         print(f"Страница загружена и сохранена в кэш: {country}")
-        
+        # -----------------------------------------------------------------------------------------------------------
         return response.text
     except Exception as e:
         print(f"Ошибка при загрузке страницы {country}: {e}")
@@ -175,6 +175,3 @@ def main():
     # Сохраняем результаты в CSV
     df = pd.DataFrame(data)
     df.to_csv(args.output, index=False)
-
-if __name__ == "__main__":
-    main()
