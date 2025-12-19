@@ -18,6 +18,10 @@ import pytest
 def test_sentence(str, res):
     assert count_words(str) == res
     
+@pytest.mark.xfail()
+def test_wrong_arg_type():
+    assert count_words(2) == 0
+    
 # def test_single_word():
 #     assert count_words("Hello") == 1
 
