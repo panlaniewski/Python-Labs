@@ -4,8 +4,7 @@ import pandas as pd
 import re
 import time
 import argparse
-import os
-from urllib.parse import quote
+import json
 # -----------------------------------------------------------------------------------------------------------
 def setup_args():
     parser = argparse.ArgumentParser(description='Парсер стран из Википедии')
@@ -18,51 +17,82 @@ def setup_args():
     parser.add_argument('-d', '--delay', type=float, default=1.0,
                        help='Задержка между запросами в секундах (по умолчанию: 1.0)')
     return parser.parse_args()
+    #python main.py -i countries.txt -o countries_data.csv -d 2.0
 # -----------------------------------------------------------------------------------------------------------
-def ensure_cache_dir(cache_dir):
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
-        print(f"Создана папка кэша: {cache_dir}")
-# -----------------------------------------------------------------------------------------------------------
-def get_cached_page(country, cache_dir, headers):
-    # Создаем безопасное имя файла для кэша
-    safe_country = quote(country, safe='')
-    cache_file = os.path.join(cache_dir, f"{safe_country}.html")
-    # -----------------------------------------------------------------------------------------------------------
-    # Если файл существует в кэше, читаем его
-    if os.path.exists(cache_file):
-        print(f"Чтение из кэша: {country}")
-        with open(cache_file, 'r', encoding='utf-8') as f:
-            return f.read()
-    # -----------------------------------------------------------------------------------------------------------
-    # Если нет в кэше, загружаем
-    url = f"https://en.wikipedia.org/wiki/{country}"
+# Функция получения данных из кэша
+def get_cached_page(country_name):
     try:
+        with open("cached_countries.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get(country_name)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    except Exception as e:
+        print(f"Ошибка при чтении кэша: {e}")
+        return None
+# -----------------------------------------------------------------------------------------------------------
+# Функция сохранения в кэш
+def save_to_cache(country_name, capital, area, population):
+    try:
+        try:
+            with open("cached_countries.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = {}
+        # -----------------------------------------------------------------------------------------------------------
+        data[country_name] = {
+            "capital": capital,
+            "area": area,
+            "population": population,
+        }
+        # -----------------------------------------------------------------------------------------------------------
+        with open("cached_countries.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        # -----------------------------------------------------------------------------------------------------------    
+        print(f"Данные по {country_name} сохранены в кэш")
+    # -----------------------------------------------------------------------------------------------------------    
+    except Exception as e:
+        print(f"Ошибка при сохранении в кэш: {e}")
+# -------------------------------------------------------------------------------------------------------------------
+# Функция загрузки страницы с сайта
+def fetch_page(country_name):
+    try:
+        # Формируем URL для Википедии
+        wiki_name = country_name.replace(' ', '_')
+        url = f"https://en.wikipedia.org/wiki/{wiki_name}"
+        # -----------------------------------------------------------------------------------------------------------
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        # -----------------------------------------------------------------------------------------------------------
+        print(f"Загружаем страницу: {url}")
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         # -----------------------------------------------------------------------------------------------------------
-        # Сохраняем в кэш
-        with open(cache_file, 'w', encoding='utf-8') as f:
-            f.write(response.text)
-        print(f"Страница загружена и сохранена в кэш: {country}")
-        # -----------------------------------------------------------------------------------------------------------
         return response.text
-    except Exception as e:
-        print(f"Ошибка при загрузке страницы {country}: {e}")
+    # ---------------------------------------------------------------------------------------------------------------   
+    except requests.RequestException as e:
+        print(f"Ошибка при загрузке страницы {country_name}: {e}")
         return None
-# -----------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
+# Функция парсинга - сбора нужных для нас данных
 def parse_country_info(soup, country_name):
     capital = ""
     area = ""
     population = ""
-    # -----------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------------
+    # Ищем HTML-элементы с искомыми данными
     infobox = soup.find('table', class_='infobox')
+    # ---------------------------------------------------------------------------------------------------------------
+    # Если не находим, то возвращаем пустые значения
     if not infobox:
         print(f"Инфобокс не найден для {country_name}")
         return capital, area, population
-    # -----------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------------
     # Ищем все строки с заголовками
     rows = infobox.find_all('tr')
+    # ---------------------------------------------------------------------------------------------------------------
+    # Поиск столицы
     for row in rows:
         th = row.find('th')
         if th:
@@ -71,7 +101,7 @@ def parse_country_info(soup, country_name):
             if any(word in th_text for word in ['capital', 'capitals', 'capital city']):
                 td = row.find('td')
                 if td:
-                    # Ищем первую ссылку в ячейке - обычно это столица
+                    # Ищем первую ссылку в ячейке, где может хранится строка столицы
                     capital_link = td.find('a')
                     if capital_link:
                         capital = capital_link.get_text().strip()
@@ -82,7 +112,7 @@ def parse_country_info(soup, country_name):
                         capital = capital_text.split('\n')[0].split('[')[0].split('(')[0].strip()
                         if capital:
                             break
-    # -----------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------------
     # Поиск площади
     for row in rows:
         th = row.find('th')
@@ -94,11 +124,12 @@ def parse_country_info(soup, country_name):
                     td = next_row.find('td')
             if td:
                 area_text = td.get_text()
+                # Форматируем строку, чтобы убрать ненужные символы
                 numbers = re.findall(r'[\d,]+', area_text)
                 if numbers:
                     area = numbers[0].replace(',', '')
             break
-    # -----------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------------
     # Поиск населения
     for row in rows:
         th = row.find('th')
@@ -110,19 +141,19 @@ def parse_country_info(soup, country_name):
                     td = next_row.find('td')
             if td:
                 population_text = td.get_text()
+                # Приводим значение численности населения к общему виду
                 numbers = re.findall(r'\d{1,3}(?:,\d{3})*', population_text)
                 if numbers:
                     clean_numbers = [num.replace(',', '') for num in numbers]
                     population = max(clean_numbers, key=len)
-            break 
-    print(f"Столица: {capital if capital else 'не найдена'}")
+            break
+    # ---------------------------------------------------------------------------------------------------------------
     return capital, area, population
 # -----------------------------------------------------------------------------------------------------------
 def main():
     # Получаем аргументы командной строки
     args = setup_args()
-    # Создаем папку для кэша
-    ensure_cache_dir(args.cache)
+    # ---------------------------------------------------------------------------------------------------------------
     # Загружаем список стран
     try:
         with open(args.input, 'r', encoding='utf-8') as f:
@@ -134,44 +165,61 @@ def main():
     except Exception as e:
         print(f"Ошибка при чтении файла {args.input}: {e}")
         return
-    # -----------------------------------------------------------------------------------------------------------
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
+    # ---------------------------------------------------------------------------------------------------------------
+    # Подготавливаем структуру для данных
     data = {
         "country": [],
-        "city": [],
+        "capital": [],  # Изменено с "city" на "capital" для согласованности
         "area": [],
         "population": []
     }
-    # -----------------------------------------------------------------------------------------------------------
-    for i, country in enumerate(countries_list, 1):
-        print(f"\n[{i}/{len(countries_list)}] Обработка: {country}")
-        # Получаем страницу (из кэша или интернета)
-        html_content = get_cached_page(country, args.cache, headers)
-        if html_content is None:
-            # Если страница не загрузилась, добавляем пустые данные
-            data["country"].append(country)
-            data["city"].append("")
-            data["area"].append("")
-            data["population"].append("")
-            continue
-        soup = BeautifulSoup(html_content, 'html.parser')
-        # Получаем официальное название страны из заголовка
-        country_name = soup.find('h1').get_text().strip()
-        print(f"Country: {country_name}")
-        # -----------------------------------------------------------------------------------------------------------
-        # Парсим информацию о стране
-        capital, area, population = parse_country_info(soup, country_name)
-        data["country"].append(country_name)
-        data["city"].append(capital)
+    # ---------------------------------------------------------------------------------------------------------------
+    # Обрабатываем каждую страну
+    for country in countries_list:
+        print(f"\nОбработка: {country}")
+        
+        # Шаг 1: Проверяем кэш
+        cached_data = get_cached_page(country)
+        if cached_data:
+            print(f"  Данные найдены в кэше")
+            capital = cached_data.get("capital", "")
+            area = cached_data.get("area", "")
+            population = cached_data.get("population", "")
+        else:
+            # Шаг 2: Если нет в кэше, загружаем и парсим
+            print(f"  Загружаем с сайта...")
+            html_content = fetch_page(country)
+            
+            if html_content is None:
+                print(f"  Не удалось загрузить данные")
+                capital, area, population = "", "", ""
+            else:
+                soup = BeautifulSoup(html_content, 'html.parser')
+                # ---------------------------------------------------------------------------------------------------------------
+                # Получаем официальное название из заголовка
+                country_name_elem = soup.find('h1')
+                actual_country_name = country_name_elem.get_text().strip() if country_name_elem else country
+                print(f"  Официальное название: {actual_country_name}")
+                # ---------------------------------------------------------------------------------------------------------------
+                # Парсим информацию
+                capital, area, population = parse_country_info(soup, actual_country_name)
+                # ---------------------------------------------------------------------------------------------------------------
+                # Сохраняем в кэш
+                if capital or area or population:
+                    save_to_cache(actual_country_name, capital, area, population)
+                else:
+                    print(f"  Не удалось извлечь данные")
+        # ---------------------------------------------------------------------------------------------------------------
+        # Добавляем данные
+        data["country"].append(country)
+        data["capital"].append(capital)
         data["area"].append(area)
         data["population"].append(population)
-        # Пауза между запросами (кроме последней итерации)
-        if i < len(countries_list):
-            print(f"Пауза {args.delay} секунд...")
+        # ---------------------------------------------------------------------------------------------------------------
+        # Пауза между запросами
+        if args.delay > 0:
             time.sleep(args.delay)
-    # -----------------------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------------------------------------
     # Сохраняем результаты в CSV
     df = pd.DataFrame(data)
-    df.to_csv(args.output, index=False)
+    df.to_csv(args.output, index=False, encoding='utf-8')
