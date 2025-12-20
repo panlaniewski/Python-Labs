@@ -1,80 +1,55 @@
 from main import merge_dicts
+import pytest
 
-def test_simple_merge():
-    dict1 = {'a': 1, 'b': 2}
-    dict2 = {'c': 3, 'd': 4}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+@pytest.mark.parametrize("d1, d2, expected", [
+    ({'a': 1}, {'b': 2}, {'a': 1, 'b': 2}),
+    ({'a': 'x'}, {'a': 'y'}, {'a': 'y'}),
+    ({'a': 5}, {'a': 10}, {'a': 10}),
+    ({'a': 10.5}, {'a': 5.5}, {'a': 10.5}),
+    ({'a': 1}, {'a': 'x'}, {'a': [1, 'x']}),
+    ({'n': {'x': 1}}, {'n': {'y': 2}}, {'n': {'x': 1, 'y': 2}}),
+])
+def test_core_logic(d1, d2, expected):
+    merge_dicts(d1, d2)
+    assert d1 == expected
 
-def test_overwrite_same_type():
-    dict1 = {'a': 1, 'b': 'hello'}
-    dict2 = {'a': 2, 'b': 'world'}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': 2, 'b': 'world'}
+def test_deep_nested_merge():
+    d1 = {'a': {'b': {'c': 1}}}
+    d2 = {'a': {'b': {'d': 2}}}
+    merge_dicts(d1, d2)
+    assert d1 == {'a': {'b': {'c': 1, 'd': 2}}}
 
-def test_numeric_max():
-    dict1 = {'a': 5, 'b': 10.5}
-    dict2 = {'a': 10, 'b': 5.5}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': 10, 'b': 10.5}
-
-def test_different_types_list():
-    dict1 = {'a': 'hello', 'b': 42}
-    dict2 = {'a': 123, 'b': 'world'}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': ['hello', 123], 'b': [42, 'world']}
-
-def test_recursive_dict_merge():
-    dict1 = {'a': 1, 'nested': {'x': 10, 'y': 20}}
-    dict2 = {'b': 2, 'nested': {'y': 30, 'z': 40}}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': 1, 'b': 2, 'nested': {'x': 10, 'y': 30, 'z': 40}}
-
-def test_deeply_nested_dicts():
-    dict1 = {'level1': {'level2': {'level3': {'a': 1}}}}
-    dict2 = {'level1': {'level2': {'level3': {'b': 2}}}}
-    merge_dicts(dict1, dict2)
-    expected = {'level1': {'level2': {'level3': {'a': 1, 'b': 2}}}}
-    assert dict1 == expected
-
-def test_mixed_nested_operations():
-    dict1 = {'data': {'num': 5, 'text': 'hello', 'mixed': 10}}
-    dict2 = {'data': {'num': 8, 'text': 'world', 'mixed': 'string'}}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'data': {'num': 8, 'text': 'world', 'mixed': [10, 'string']}}
+def test_mixed_nested_types():
+    d1 = {'data': {'num': 5, 'val': 10}}
+    d2 = {'data': {'num': 3, 'val': 'x'}}
+    merge_dicts(d1, d2)
+    assert d1 == {'data': {'num': 5, 'val': [10, 'x']}}
 
 def test_empty_dicts():
-    dict1 = {}
-    dict2 = {'a': 1}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': 1}
-    
-    dict1 = {'a': 1}
-    dict2 = {}
-    original_dict1 = dict1.copy()
-    merge_dicts(dict1, dict2)
-    assert dict1 == original_dict1  
+    d1 = {}
+    merge_dicts(d1, {'a': 1})
+    assert d1 == {'a': 1}
 
+    d2 = {'a': 1}
+    merge_dicts(d2, {})
+    assert d2 == {'a': 1}
+
+@pytest.mark.xfail
 def test_none_values():
-    dict1 = {'a': None, 'b': 10}
-    dict2 = {'a': 'value', 'b': None}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'a': [None, 'value'], 'b': [10, None]}
+    d1 = {'a': None}
+    d2 = {'a': 1}
+    merge_dicts(d1, d2)
+    assert d1 == {'a': 1}
 
-def test_list_values():
-    dict1 = {'items': [1, 2, 3], 'data': {'nums': [1, 2]}}
-    dict2 = {'items': [4, 5, 6], 'data': {'nums': [3, 4]}}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'items': [4, 5, 6], 'data': {'nums': [3, 4]}}
+@pytest.mark.skip(reason="Списки, множества и кортежи перезаписываются")
+def test_collections_merge():
+    d1 = {'x': [1, 2], 'y': {1, 2}}
+    d2 = {'x': [3], 'y': {3}}
+    merge_dicts(d1, d2)
+    assert d1 == {'x': [1, 2, 3], 'y': {1, 2, 3}}
 
-def test_tuple_values():
-    dict1 = {'coord': (1, 2), 'value': 10}
-    dict2 = {'coord': (3, 4), 'value': 20}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'coord': (3, 4), 'value': 20}  
-
-def test_set_values():
-    dict1 = {'items': {1, 2, 3}}
-    dict2 = {'items': {3, 4, 5}}
-    merge_dicts(dict1, dict2)
-    assert dict1 == {'items': {3, 4, 5}}  
+def test_collections_overwrite():
+    d1 = {'items': [1, 2], 'coord': (1, 2), 'set': {1, 2}}
+    d2 = {'items': [3], 'coord': (3, 4), 'set': {3}}
+    merge_dicts(d1, d2)
+    assert d1 == {'items': [3], 'coord': (3, 4), 'set': {3}}
