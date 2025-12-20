@@ -13,7 +13,7 @@ campaign_data = pd.read_csv("entrance_campaign.csv")
 # plt.show()
 
 # plt.figure(figsize=(10, 6))
-# sns.histplot(campaign_data["admission_score"], bins=25, color="skyblue")
+# sns.histplot(campaign_data["admission_score"], bins=30, color="skyblue", kde=True, fill=True)
 # plt.title("Распределение общей суммы баллов при поступлении за 2020-2024 гг.", fontsize=14)
 # plt.xlabel("Общая сумма баллов")
 # plt.ylabel("Количество абитуриентов")
@@ -76,7 +76,8 @@ campaign_data = pd.read_csv("entrance_campaign.csv")
 # plt.ylabel("")
 # plt.tight_layout()
 # plt.show()
-
+#------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 fig.suptitle("Итоги приёмной кампании БГУ за 2020-2024 год", fontsize=16, weight='bold')
 
@@ -104,6 +105,7 @@ axes[0,2].set_ylabel("")
 year_counts = campaign_data["admission_year"].value_counts().sort_index()
 sns.barplot(x=year_counts.index.astype(str), y=year_counts.values, color="green", alpha=0.7, ax=axes[1,0])
 axes[1,0].set_title("Количество абитуриентов по годам")
+axes[1,0].set_ylim(150, 240)
 axes[1,0].set_xlabel("")
 
 year_data = campaign_data[campaign_data["admission_year"] == 2021]
